@@ -24,12 +24,12 @@ random.seed(9001)
 from random import randint
 import statistics
 
-__author__ = "Your Name"
-__copyright__ = "Universite Paris Diderot"
-__credits__ = ["Your Name"]
+__author__ = "Maxime TISON"
+__copyright__ = "Universite de Paris"
+__credits__ = ["Maxime TISON"]
 __license__ = "GPL"
 __version__ = "1.0.0"
-__maintainer__ = "Your Name"
+__maintainer__ = "Maxime TISON"
 __email__ = "your@email.fr"
 __status__ = "Developpement"
 
@@ -66,21 +66,44 @@ def get_arguments():
                         help="Save graph as image (png)")
     return parser.parse_args()
 
+fastq_file = open("file_name.fq", "r")
 
 def read_fastq(fastq_file):
-    pass
-
+    fa = fastq_file.readlines()
+    final_fa = []
+    for i in fa:
+        final_fa.append(i.strip())
+    final_fa = final_fa[1::4]
+    return final_fa
+    
 
 def cut_kmer(read, kmer_size):
-    pass
+    for i in range (0,len(read)) :
+        if len(read)-i >= kmer_size-1 : 
+            yield read[i:i+kmer_size]
 
 
 def build_kmer_dict(fastq_file, kmer_size):
-    pass
+    kmers_list =[]
+    sequence = read_fastq(fastq_file)
+    for i in it.chain(sequence):
+        kmers=cut_kmer(i, kmer_size)
+        for kmer in it.chain(kmers):
+            if len(kmer) == kmer_size : 
+                kmers_list.append(kmer)
+    counter = Counter(kmers_list)
+    return dict(counter)
 
 
 def build_graph(kmer_dict):
-    pass
+    G = nx.DiGraph()
+    for item in kmer_dict.items() :
+        kmer = item[0]
+        weight = item[1]
+        prefixe = kmer[:-1]
+        suffixe = kmer[1:]
+        G.add_edge(prefixe, suffixe, weight=weight)
+    return (G)
 
 
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
